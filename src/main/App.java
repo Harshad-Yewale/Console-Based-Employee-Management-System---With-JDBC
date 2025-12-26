@@ -1,9 +1,6 @@
 
 package main;
-
 import service.EmployeeService;
-
-import java.text.ParseException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -11,43 +8,65 @@ public class App {
 
     public static void main(String[] args) {
 
-        boolean exit=true;
+        boolean exit = true;
         String choice;
 
-        Scanner sc= new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
         EmployeeService employeeService = new EmployeeService();
 
-        System.out.println("*******************************");
+        System.out.println("--------------------------------");
         System.out.println("* Employee Management System  *");
-        System.out.println("*******************************");
+        System.out.println("--------------------------------");
 
-        while (exit){
-
+        while (exit) {
             System.out.println("""
                     Choose an option :
                     1)Add Employee
                     2)List Employees
-                    3)Exit
-                    """);
-            choice=sc.nextLine();
+                    3)Remove Employee
+                    4)Search Employee
+                    5)Exit
+                    ---------------------------------""");
+            System.out.print("Your Choice: ");
+            choice = sc.nextLine();
 
-            switch (choice){
-                case "1"->addEmployee(sc, employeeService);
-                case "2"->listEmployee(employeeService);
-                case "3"->exit=false;
+            switch (choice) {
+                case "1" -> addEmployee(sc, employeeService);
+                case "2" -> {
+                    System.out.println("""
+                            List Employees:
+                            1)Normal
+                            2)Sort By salary(asc)
+                            3)Sort By Salary(desc)
+                            4)Sort By Name""");
+                    System.out.print("Your Choice: ");
+                    int sortChoice=Integer.parseInt(sc.nextLine());
+                    listEmployee(employeeService,sortChoice);
+                }
+                case "3" -> removeEmployee(sc, employeeService);
+                case "4" -> {
+                    System.out.println("""
+                            Search Employee By:
+                            1)Id
+                            2)Name
+                            3)Position
+                            4)Salary Less then 
+                            5)Salary Greater then""");
+                    System.out.print("Your Choice: ");
+                    int searchChoice=Integer.parseInt(sc.nextLine());
+
+                    getEmployeeDetails(sc,employeeService,searchChoice);
+                }
+                case "5" -> exit = false;
                 default -> System.out.println("Invalid choice");
             }
-
-
         }
     }
 
 
 
-    private static void addEmployee(Scanner sc , EmployeeService employeeService) {
+    private static void addEmployee(Scanner sc, EmployeeService employeeService) {
         try {
-
-
             System.out.print("Employee Name : ");
             String name = sc.nextLine();
             System.out.print("Employee Position : ");
@@ -55,15 +74,30 @@ public class App {
             System.out.print("Employee Salary :");
             double salary = Double.parseDouble(sc.nextLine());
             employeeService.addEmployee(name, position, salary);
-        }
-        catch (InputMismatchException e){
-            System.out.println("Error Occurred while taking input in App :"+e.getMessage());
-        }
-        catch (NumberFormatException e){
-            System.out.println("Error Occurred while parsing in App"+e.getMessage());
+        } catch (InputMismatchException e) {
+            System.out.println("Error Occurred while taking input in App :" + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("Error Occurred while parsing in App" + e.getMessage());
         }
     }
-    private static void listEmployee(EmployeeService employeeService) {
-        employeeService.listEmployee();
+
+    private static void listEmployee(EmployeeService employeeService,int sortChoice) {
+        employeeService.employeeListMethod(sortChoice);
     }
+
+    private static void removeEmployee(Scanner sc, EmployeeService employeeService) {
+
+        try {
+            System.out.print("Enter Employee ID You Want to Remove :");
+            int Id = Integer.parseInt(sc.nextLine());
+            employeeService.removeEmployee(Id);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid Input (Enter Numbers Only)");
+        }
+    }
+
+    private static void getEmployeeDetails(Scanner sc, EmployeeService employeeService, int searchChoice) {
+        employeeService.employeeSearchMethod(searchChoice,sc);
+    }
+
 }
