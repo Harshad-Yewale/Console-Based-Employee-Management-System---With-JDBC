@@ -1,7 +1,6 @@
 
 package main;
 import service.EmployeeService;
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class App {
@@ -20,12 +19,14 @@ public class App {
 
         while (exit) {
             System.out.println("""
+                    \n
                     Choose an option :
                     1)Add Employee
                     2)List Employees
                     3)Remove Employee
                     4)Search Employee
-                    5)Exit
+                    5)Update Employee
+                    6)Exit
                     ---------------------------------""");
             System.out.print("Your Choice: ");
             choice = sc.nextLine();
@@ -50,20 +51,19 @@ public class App {
                             1)Id
                             2)Name
                             3)Position
-                            4)Salary Less then 
+                            4)Salary Less then
                             5)Salary Greater then""");
                     System.out.print("Your Choice: ");
                     int searchChoice=Integer.parseInt(sc.nextLine());
 
                     getEmployeeDetails(sc,employeeService,searchChoice);
                 }
-                case "5" -> exit = false;
+                case "5" -> updateEmployee(employeeService,sc);
+                case "6" -> exit = false;
                 default -> System.out.println("Invalid choice");
             }
         }
     }
-
-
 
     private static void addEmployee(Scanner sc, EmployeeService employeeService) {
         try {
@@ -74,8 +74,6 @@ public class App {
             System.out.print("Employee Salary :");
             double salary = Double.parseDouble(sc.nextLine());
             employeeService.addEmployee(name, position, salary);
-        } catch (InputMismatchException e) {
-            System.out.println("Error Occurred while taking input in App :" + e.getMessage());
         } catch (NumberFormatException e) {
             System.out.println("Error Occurred while parsing in App" + e.getMessage());
         }
@@ -98,6 +96,16 @@ public class App {
 
     private static void getEmployeeDetails(Scanner sc, EmployeeService employeeService, int searchChoice) {
         employeeService.employeeSearchMethod(searchChoice,sc);
+    }
+
+    private static void updateEmployee(EmployeeService employeeService, Scanner sc) {
+        try {
+            System.out.print("Enter Employee ID You Want to Update:");
+            int id = Integer.parseInt(sc.nextLine());
+            employeeService.updateEmp(id,sc);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid Input (Enter Numbers Only)");
+        }
     }
 
 }

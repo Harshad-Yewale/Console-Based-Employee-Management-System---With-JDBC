@@ -14,13 +14,12 @@ import java.util.List;
 
 public class EmployeeDaoImpl implements EmployeeDao {
 
-    private static String column;
+
     //Queries to Interact with database
     private static final String insertQuery = "Insert Into Employee (EmployeeName,EmployeePosition,EmployeeSalary) Values(?,?,?)";
     private static final String listQuery = "Select * from Employee";
     private static final String DeleteQuery = "Delete From Employee Where EmployeeID=?";
-
-    private static final String searchQuery = "Select * from Employee where " + column + " = ?";
+    private static final String updateQuery ="Update Employee Set EmployeeName=?,EmployeePosition=?,EmployeeSalary=? Where EmployeeId=?";
 
     //Insert Function
     @Override
@@ -56,7 +55,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
             ResultSet resultSet = listStatement.executeQuery();
 
             while (resultSet.next()) {
-                Employee e = new Employee(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3), resultSet.getDouble(4));
+                Employee e = mapEmployee(resultSet);
                 employeeList.add(e);
             }
 
@@ -202,6 +201,32 @@ public class EmployeeDaoImpl implements EmployeeDao {
         }
 
         return list;
+    }
+
+    @Override
+    public void updateEmployee(Employee employee) {
+
+        try(Connection con=DBConnection.getConnection();
+        PreparedStatement preparedStatement = con.prepareStatement(updateQuery)){
+
+            preparedStatement.setString(1,employee.getEmployeeName());
+            preparedStatement.setString(2,employee.getEmployeePosition());
+            preparedStatement.setDouble(3,employee.getEmployeeSalary());
+            preparedStatement.setInt(4,employee.getEmployeeId());
+
+            int result=preparedStatement.executeUpdate();
+            if(result>0){
+                System.out.println("Employee With EmployeeId: "+employee.getEmployeeId()+" Updated Successfully");
+            }
+            else{
+                System.out.println("Employee Does not Exist");
+            }
+
+        }
+        catch (SQLException e){
+            System.out.println("Error Occurred While Updating Employee: "+e.getMessage());
+        }
+
     }
 
     private Employee mapEmployee(ResultSet rs) throws SQLException {

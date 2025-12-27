@@ -13,5 +13,6 @@ public interface EmployeeDao {
     List<Employee> findByPosition(String position);
     List<Employee> findBySalaryLessThen(double salary);
     List<Employee> findBySalaryGreaterThen(double salary);
+    void updateEmployee(Employee employee);
 
 }

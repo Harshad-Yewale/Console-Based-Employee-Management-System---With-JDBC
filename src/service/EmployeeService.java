@@ -3,8 +3,6 @@ package service;
 import dao.EmployeeDao;
 import dao.EmployeeDaoImpl;
 import domain.Employee;
-import util.DBConnection;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -12,7 +10,7 @@ import java.util.Scanner;
 
 public class EmployeeService {
 
-    EmployeeDao employeeDao = new EmployeeDaoImpl();
+    private final EmployeeDao employeeDao = new EmployeeDaoImpl();
 
     public void addEmployee(String name, String position, double salary) {
 
@@ -21,11 +19,11 @@ public class EmployeeService {
             return;
         }
         if (position == null || position.trim().isEmpty()) {
-            System.out.println("How can you be Employee without a Job Position");
+            System.out.println("Job Position can not be Empty");
             return;
         }
         if (salary <= 0) {
-            System.out.println("Are you paying to work there bro why is you salary in negative");
+            System.out.println("Salary is Invalid");
             return;
         }
 
@@ -139,6 +137,43 @@ public class EmployeeService {
         double Salary =Double.parseDouble(sc.nextLine());
         employeeList=employeeDao.findBySalaryGreaterThen(Salary);
         return employeeList;
+    }
+
+    public void updateEmp(int id,Scanner sc){
+        List<Employee> updateList=new ArrayList<>();
+        if(id<=0){
+            System.out.println("Invalid Id Enter a Valid Id : ");
+            return;
+        }
+        updateList=employeeDao.findById(id);
+        printEmployees(updateList);
+        if(updateList.isEmpty()) {
+            System.out.println("\nEmployee Not Found ");
+            return;
+        }
+            System.out.print("Enter the Updated Name: ");
+            String name=sc.nextLine();
+            System.out.print("Enter the Updated Position: ");
+            String position=sc.nextLine();
+            System.out.print("Enter the Updated Salary");
+            double salary=Double.parseDouble(sc.nextLine());
+
+            if(name==null || name.trim().isEmpty()){
+                System.out.println("Employee Name can not be null Try Again");
+                return;
+            }
+            if(position==null || position.trim().isEmpty()){
+                System.out.println("Employee Position can not be null Try Again");
+                return;
+            }
+            if(salary<=0){
+                System.out.println("Employee Salary is Invalid Try Again");
+                return;
+            }
+            Employee e=new Employee(id,name,position,salary);
+            employeeDao.updateEmployee(e);
+
+
     }
 
 
