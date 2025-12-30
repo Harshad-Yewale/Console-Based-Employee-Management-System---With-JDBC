@@ -1,6 +1,9 @@
 
 package main;
 import service.EmployeeService;
+import util.SearchOptions;
+import util.SortOptions;
+
 import java.util.Scanner;
 
 public class App {
@@ -80,7 +83,15 @@ public class App {
     }
 
     private static void listEmployee(EmployeeService employeeService,int sortChoice) {
-        employeeService.employeeListMethod(sortChoice);
+
+        SortOptions sortOptions=switch (sortChoice) {
+            case 1 -> SortOptions.Normal;
+            case 2 -> SortOptions.sortBySalary;
+            case 3 -> SortOptions.sortBySalaryDESC;
+            case 4 -> SortOptions.sortByName;
+            default -> SortOptions.Normal;
+        };
+        employeeService.employeeListMethod(sortOptions);
     }
 
     private static void removeEmployee(Scanner sc, EmployeeService employeeService) {
@@ -95,7 +106,20 @@ public class App {
     }
 
     private static void getEmployeeDetails(Scanner sc, EmployeeService employeeService, int searchChoice) {
-        employeeService.employeeSearchMethod(searchChoice,sc);
+
+
+        SearchOptions choice=switch (searchChoice){
+            case 1->SearchOptions.BY_ID;
+            case 2->SearchOptions.BY_NAME;
+            case 3->SearchOptions.BY_POSITION;
+            case 4->SearchOptions.BY_SALARY_LESS_THAN;
+            case 5->SearchOptions.BY_SALARY_GREATER_THAN;
+            default -> null;
+        };
+
+        if(choice!=null) {
+            employeeService.employeeSearchMethod(choice, sc);
+        }
     }
 
     private static void updateEmployee(EmployeeService employeeService, Scanner sc) {

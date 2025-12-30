@@ -3,10 +3,10 @@ package service;
 import dao.EmployeeDao;
 import dao.EmployeeDaoImpl;
 import domain.Employee;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Scanner;
+import util.SearchOptions;
+import util.SortOptions;
+
+import java.util.*;
 
 public class EmployeeService {
 
@@ -31,16 +31,12 @@ public class EmployeeService {
         employeeDao.insertEmployee(employee);
     }
 
-    public void employeeListMethod(int choice) {
+    public void employeeListMethod(SortOptions option) {
         List<Employee> employeeList = new ArrayList<>(employeeDao.listEmployee());
-        switch (choice) {
-            case 1 -> {
-                // No sorting Needed
-            }
-            case 2 -> listEmployeeBySalary(employeeList);
-            case 3 -> listEmployeeBySalaryDESC(employeeList);
-            case 4 -> listEmployeeByName(employeeList);
-            default -> System.out.println("Invalid sorting option");
+        Comparator<Employee> comparator=sortStrategy.get(option);
+
+        if(comparator!=null){
+            employeeList.sort(comparator);
         }
         printEmployees(employeeList);
     }
@@ -72,17 +68,17 @@ public class EmployeeService {
     }
 
     //different sorting techniques
-    public void listEmployeeBySalary(List<Employee> employeeList) {
-        employeeList.sort(Comparator.comparingDouble(Employee::getEmployeeSalary));
-    }
+    private  static final Map<SortOptions,Comparator<Employee>> sortStrategy=
+            Map.of(
+                    SortOptions.sortBySalary,
+                    Comparator.comparingDouble(Employee::getEmployeeSalary),
 
-    public void listEmployeeBySalaryDESC(List<Employee> employeeList) {
-        employeeList.sort(Comparator.comparingDouble(Employee::getEmployeeSalary).reversed());
-    }
+                    SortOptions.sortBySalaryDESC,
+                    Comparator.comparingDouble(Employee::getEmployeeSalary).reversed(),
 
-    public void listEmployeeByName(List<Employee> employeeList) {
-        employeeList.sort(Comparator.comparing(Employee::getEmployeeName));
-    }
+                    SortOptions.sortByName,
+                    Comparator.comparing(Employee::getEmployeeName)
+            );
 
     public void removeEmployee(int id) {
         if (id <= 0) {
@@ -92,51 +88,36 @@ public class EmployeeService {
         employeeDao.deleteEmployee(id);
     }
 
-    public void employeeSearchMethod(int searchChoice, Scanner sc){
+    public void employeeSearchMethod(SearchOptions searchChoice, Scanner sc){
         List<Employee> employeeList = new ArrayList<>();
+        Object value;
 
         switch (searchChoice){
-            case 1->employeeList=searchEmployeeById(employeeList,sc);
-            case 2->employeeList=searchEmployeeByName(employeeList,sc);
-            case 3->employeeList=searchEmployeeByPosition(employeeList,sc);
-            case 4->employeeList=searchEmployeeBySalaryLessThen(employeeList,sc);
-            case 5->employeeList=searchEmployeeBySalaryGreaterThen(employeeList,sc);
-            default -> System.out.println("Invalid options");
+            case BY_ID -> {
+                System.out.println("Enter Employee Id:");
+                value=Integer.parseInt(sc.nextLine());
+            }
+            case BY_NAME -> {
+                System.out.println("Enter Employee Name:");
+                value=sc.nextLine();
+            }
+            case BY_POSITION-> {
+                System.out.println("Enter Employee Position:");
+                value=sc.nextLine();
+            }
+            case BY_SALARY_LESS_THAN,BY_SALARY_GREATER_THAN -> {
+                System.out.println("Enter Employee Salary:");
+                value=Double.parseDouble(sc.nextLine());
+            }
+            default -> {
+                System.out.println("Invalid Option");
+                return;
+            }
+
         }
+        employeeList=employeeDao.searchEmployee(searchChoice,value);
+
         printEmployees(employeeList);
-    }
-
-    private List<Employee> searchEmployeeById(List<Employee> employeeList,Scanner sc) {
-        System.out.print("Enter the employee Id : ");
-        int id=Integer.parseInt(sc.nextLine());
-        employeeList=employeeDao.findById(id);
-        return employeeList;
-    }
-    private List<Employee> searchEmployeeByName(List<Employee> employeeList,Scanner sc) {
-        System.out.print("Enter the employee Name : ");
-        String name=sc.nextLine();
-        employeeList=employeeDao.findByName(name);
-        return employeeList;
-    }
-
-    private List<Employee> searchEmployeeByPosition(List<Employee> employeeList,Scanner sc) {
-        System.out.print("Enter the employee Position : ");
-        String Position=sc.nextLine();
-        employeeList=employeeDao.findByPosition(Position);
-        return employeeList;
-    }
-
-    private List<Employee> searchEmployeeBySalaryLessThen(List<Employee> employeeList,Scanner sc) {
-        System.out.print("Enter the employee Salary : ");
-        double Salary =Double.parseDouble(sc.nextLine());
-        employeeList=employeeDao.findBySalaryLessThen(Salary);
-        return employeeList;
-    }
-    private List<Employee> searchEmployeeBySalaryGreaterThen(List<Employee> employeeList,Scanner sc) {
-        System.out.print("Enter the employee Salary : ");
-        double Salary =Double.parseDouble(sc.nextLine());
-        employeeList=employeeDao.findBySalaryGreaterThen(Salary);
-        return employeeList;
     }
 
     public void updateEmp(int id,Scanner sc){
@@ -145,7 +126,7 @@ public class EmployeeService {
             System.out.println("Invalid Id Enter a Valid Id : ");
             return;
         }
-        updateList=employeeDao.findById(id);
+        updateList=employeeDao.searchEmployee(SearchOptions.BY_ID,id);
         printEmployees(updateList);
         if(updateList.isEmpty()) {
             System.out.println("\nEmployee Not Found ");
